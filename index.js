@@ -1,51 +1,114 @@
-/* global AFRAME */
-
 if (typeof AFRAME === 'undefined') {
   throw new Error('Component attempted to register before AFRAME was available.');
 }
 
+var warn = console.warn;
+
+AFRAME.registerSystem('puredata', {
+  init: function () {
+    this.Pd = require('webpd');
+  },
+});
+
+var axios = require('axios');
+
 /**
- * Example component for A-Frame.
+ * Sound component.
  */
-AFRAME.registerComponent('example', {
-  schema: { },
+AFRAME.registerComponent('puredata', {
+  schema: {
+    src: { type: 'src' },
+    on: { default: '' },
+    autoplay: { default: false },
+    loop: { default: false },
+    volume: { default: 1 }
+  },
+
+  multiple: true,
+
+  init: function () {
+    this.listener = null;
+    this.sound = null;
+  },
+
+  update: function (oldData) {
+    var data = this.data;
+    var sound = this.sound;
+    var srcChanged = data.src !== oldData.src;
+    // Create new sound if not yet created or changing `src`.
+    if (srcChanged) {
+      if (!data.src) {
+        warn('Audio source was not specified with `src`');
+        return;
+      }
+      sound = this.setupSound();
+    }
+  },
+
+  remove: function () {
+    this.el.removeObject3D(this.attrName);
+
+    this.system.Pd.destroyPatch(this.patch);
+
+    try {
+      this.sound.disconnect();
+    } catch (e) {
+      // disconnect() will throw if it was never connected initially.
+      warn('Audio source not properly disconnected');
+    }
+  },
+
+  play: function () {
+  },
+
+  pause: function () {
+  },
 
   /**
-   * Set if component needs multiple instancing.
+   * Removes current sound object, creates new sound object, adds to entity.
+   *
+   * @returns {object} sound
    */
-  multiple: false,
+  setupSound: function () {
+    var el = this.el;
+    var sceneEl = el.sceneEl;
 
-  /**
-   * Called once when component is attached. Generally for initial setup.
-   */
-  init: function () { },
+    // Only want one AudioListener. Cache it on the scene.
+    var listener = this.listener = sceneEl.audioListener || new THREE.AudioListener();
+    sceneEl.audioListener = listener;
 
-  /**
-   * Called when component is attached and when component data changes.
-   * Generally modifies the entity based on the data.
-   */
-  update: function (oldData) { },
+    if (sceneEl.camera) {
+      sceneEl.camera.add(listener);
+    }
 
-  /**
-   * Called when a component is removed (e.g., via removeAttribute).
-   * Generally undoes all modifications to the entity.
-   */
-  remove: function () { },
+    // Wait for camera if necessary.
+    sceneEl.addEventListener('camera-set-active', function (evt) {
+      evt.detail.cameraEl.getObject3D('camera').add(listener);
+    });
 
-  /**
-   * Called on each scene tick.
-   */
-  // tick: function (t) { },
+    var sound = this.sound || new THREE.PositionalAudio(listener);
 
-  /**
-   * Called when entity pauses.
-   * Use to stop or remove any dynamic or background behavior such as events.
-   */
-  pause: function () { },
+    if(this.patch) {
+      this.system.Pd.destroyPatch(this.patch);
+    }
 
-  /**
-   * Called when entity resumes.
-   * Use to continue or add any dynamic or background behavior such as events.
-   */
-  play: function () { }
+    axios.request(this.data.src, { responseType: 'text' })
+      .then(function (res) {
+        var patchStr = res.data;
+        this.patch = this.system.Pd.loadPatch(patchStr);
+        sound.setNodeSource(this.patch.o(0).getOutNode());
+      }.bind(this))
+      .catch(function (err) {
+        console.log(err)
+      });
+
+    if(!this.system.Pd.isStarted()) {
+      this.system.Pd.start({
+        audioContext: listener.context,
+      });
+    }
+
+    el.setObject3D(this.attrName, sound);
+    return sound;
+  }
 });

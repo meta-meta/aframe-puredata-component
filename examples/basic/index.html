@@ -6,7 +6,8 @@
   <body>
     <a-scene>
       <a-assets></a-assets>
-      <a-entity geometry="primitive: box" material="color: #C03546"></a-entity>
+      <a-entity position="2 0 -2" geometry="primitive: box" material="color: #C03546" puredata="src: url(noise.pd)"></a-entity>
+      <a-entity position="-2 0 -2" geometry="primitive: box" material="color: #003546" puredata="src: url(osc.pd)"></a-entity>
     </a-scene>
   </body>
 </html>
