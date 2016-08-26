@@ -64,10 +64,6 @@
 	AFRAME.registerComponent('puredata', {
 	  schema: {
 	    src: { type: 'src' },
-	    on: { default: '' },
-	    autoplay: { default: false },
-	    loop: { default: false },
-	    volume: { default: 1 }
 	  },
 
 	  multiple: true,
@@ -108,6 +104,10 @@
 	  },
 
 	  pause: function () {
+	  },
+	  
+	  message: function (inletIndex, args) {
+	    this.patch.i(inletIndex).message(args);
 	  },
 
 	  /**
