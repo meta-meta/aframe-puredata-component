@@ -6,8 +6,24 @@
   <body>
     <a-scene>
       <a-assets></a-assets>
-      <a-entity position="3 0 -7" geometry="primitive: box" material="color: #C03546" puredata="src: url(noise.pd)"></a-entity>
-      <a-entity position="-2 0 -4" geometry="primitive: box" material="color: #003546" puredata="src: url(osc.pd)"></a-entity>
+      <a-entity position="3 0 10" geometry="primitive: box" material="color: #AAA" puredata="src: url(noise.pd)"></a-entity>
+      <a-entity id="osc" position="-4 0 -12" geometry="primitive: box" material="color: #003546" puredata="src: url(osc.pd)"></a-entity>
     </a-scene>
+    <script type=text/javascript>
+      function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
+      setInterval(function () {
+        var osc = document.getElementById('osc');
+        osc.components.puredata.message(0, [100 + Math.random() * 5000]);
+        osc.setAttribute('material', 'color: ' + getRandomColor());
+      }, 1000)
+    </script>
   </body>
 </html>
