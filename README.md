@@ -1,3 +1,9 @@
+## FIXME: This needs to be updated to start WebAudio on user input event
+
+Demo here (currently broken on most modern browsers) [https://github.com/meta-meta/aframe-puredata-component/basic](https://github.com/meta-meta/aframe-puredata-component/basic)
+
+
+
 ## aframe-component-boilerplate
 
 > This is not at all means required for writing an A-Frame component. It is intended for publishing and sharing a component for the community to re-use.
