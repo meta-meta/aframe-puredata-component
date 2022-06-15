@@ -1,6 +1,6 @@
 ## FIXME: This needs to be updated to start WebAudio on user input event
 
-Demo here (currently broken on most modern browsers) [https://github.com/meta-meta/aframe-puredata-component/basic](https://github.com/meta-meta/aframe-puredata-component/basic)
+Demo here (currently broken on most modern browsers) [https://meta-meta.github.io/aframe-puredata-component/basic/](https://meta-meta.github.io/aframe-puredata-component/basic/)
 
 
 
